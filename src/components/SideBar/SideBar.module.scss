@@ -1,0 +1,44 @@
+// src/Sidebar.scss
+
+.sidebar {
+    width: 200px;
+    height: 100vh;
+    background-color: #e0e0e0; // Light background color for contrast
+    color: white;
+    padding: 20px;
+    position: fixed; // Fix to the left side
+    top: 0;
+    left: 0;
+    overflow-y: auto; // Enable scrolling if content overflows
+
+   
+ul {
+    list-style: none; // Remove default list styling
+    padding: 0; // Remove padding
+    margin: 0; // Remove margin
+  }
+  
+  li {
+    margin-bottom: 35px; // Space between items
+  }
+  
+  a {
+    text-decoration: none; // Remove underline from links
+    color: #00796b; // Primary link color
+    font-size: 18px; // Link font size
+    transition: color 0.3s; // Smooth color transition on hover
+  
+    &:hover {
+      color: #004d40; // Darker shade on hover
+    }
+  }
+  
+  .signOut {
+    margin-top: auto; // Push sign-out button to the bottom
+    font-weight: bold; // Make it bold
+  }
+  
+  .signOut a {
+    color: #d32f2f; // Red color for sign-out for emphasis
+  }
+}
