@@ -1,40 +1,58 @@
-// src/services/useLogin.js
-import { useEffect, useState } from 'react';
-import { auth, provider } from '../firebase';
-import { signInWithRedirect, getRedirectResult, onAuthStateChanged } from 'firebase/auth';
+import { useState, useEffect } from "react";
+import { auth, provider } from "../firebase"; 
+import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"; 
+import { useNavigate } from "react-router-dom"; 
 
 const useLogin = () => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); 
+  const [error, setError] = useState(null); 
+  const navigate = useNavigate(); 
 
   useEffect(() => {
-    // Set up the authentication listener
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false); // Stop loading when we have user information
-      console.log('Current user:', currentUser); // Log the current user
+      setLoading(false); 
+      if (currentUser) {
+        setUser(currentUser);
+        console.log("User logged in:", currentUser); // Log user details
+        
+      } else {
+        setUser(null);
+        console.log("User is logged out");
+      }
     });
 
-    // Check for redirect result after login
-    getRedirectResult(auth)
+    return () => unsubscribe();
+  }, [navigate]);
+
+  const loginWithGooglePopup = () => {
+    signInWithPopup(auth, provider)
       .then((result) => {
-        if (result) {
-          setUser(result.user); // Set user if a redirect result is available
-        }
+        const user = result.user; 
+        console.log("User logged in with popup: ", user); 
+        setUser(user); 
+        navigate("/dashboard"); // Redirect to dashboard after login
       })
       .catch((error) => {
-        console.error("Error handling redirect:", error);
+        console.error("Error during Google sign-in with popup:", error);
+        setError(error.message);
       });
-
-    // Clean up the listener on unmount
-    return () => unsubscribe();
-  }, []);
-
-  const loginWithGoogle = () => {
-    return signInWithRedirect(auth, provider);
   };
 
-  return { user, loading, loginWithGoogle };
+  const logout = () => {
+    signOut(auth)
+      .then(() => {
+        console.log("User signed out");
+        setUser(null); 
+        navigate("/"); // Redirect to login page after logout
+      })
+      .catch((error) => {
+        console.error("Error signing out: ", error);
+        setError(error.message); 
+      });
+  };
+
+  return { user, loading, error, loginWithGooglePopup, logout };
 };
 
 export default useLogin;
