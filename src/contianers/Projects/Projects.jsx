@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import styles from "./Projects.module.scss";
 import useProjects from "../../services/project.service";
 import SideBar from "../../components/SideBar/SideBar";
-import { db } from '../../firebase';
-import { collection, addDoc, getDocs } from 'firebase/firestore';
-import { useHistory } from "react-router/cjs/react-router.min";
-
+import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom
+import { db } from "../../firebase";
+import { collection, addDoc, getDocs } from "firebase/firestore";
+import { auth } from '../../firebase';
 const Projects = () => {
-  const history = useHistory(); // Initialize useHistory
+  const { deleteProject, fetchProjects,user } = useProjects();
+  const navigate = useNavigate(); // Initialize navigate
 
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [projects, setProjects] = useState([]);
@@ -15,27 +16,33 @@ const Projects = () => {
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [priority, setPriority] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const currentUser = auth.currentUser;  // Get the current logged-in user
 
   const toggleForm = () => {
     setIsFormVisible(!isFormVisible);
   };
 
+  useEffect(() => {
+    fetchProjects().then((projectsData) => {
+      setProjects(projectsData);
+      setIsLoading(false);
+    });
+  }, [currentUser, fetchProjects]);
   const handleSubmit = (e) => {
     e.preventDefault();
     const newProject = {
       name: projectName,
       description: projectDescription,
       dueDate: dueDate || "MM/DD/YYYY",
-      status: "In Progress",
-      progress: 0,
-      priority,
-    };
 
-    console.log("Submitting project:", newProject);
-    
-    addDoc(collection(db, 'projects'), newProject)
-    .then((docRef) => {
-      console.log("Project added successfully with ID:", docRef.id);
+      priority,
+  userId: currentUser && currentUser.uid,
+
+    };
+    addDoc(collection(db, "projects"), newProject)
+      .then((docRef) => {
+        console.log("Project added successfully with ID:", docRef.id);
         setIsFormVisible(false);
         setProjectName("");
         setProjectDescription("");
@@ -48,32 +55,21 @@ const Projects = () => {
       });
   };
 
-  const fetchProjects = () => {
-    getDocs(collection(db, 'projects'))
-      .then((querySnapshot) => {
-        const projectsArray = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setProjects(projectsArray);
-      })
-      .catch((error) => {
-        console.error("Error fetching projects: ", error);
-      });
-  };
-
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
-
   const handleViewTasks = (projectId) => {
-    // Navigate to the Kanban board for the specific project
-    history.push(`/project/${projectId}/tasks`);
+    // Navigate to the project tasks page using react-router-dom's navigate function
+    navigate(`/project/${projectId}/tasks`);
   };
+
+
   return (
-    <>
+    <div className={styles.projects}>
       <h2>Projects</h2>
+
       <SideBar />
       {!isFormVisible && (
-        <button className={styles.button} onClick={toggleForm}>Create a new project</button>
+        <button className={styles.button} onClick={toggleForm}>
+          Create a new project
+        </button>
       )}
       {isFormVisible && (
         <form onSubmit={handleSubmit} className={styles.projectForm}>
@@ -110,33 +106,69 @@ const Projects = () => {
               onChange={(e) => setPriority(e.target.value)}
               required
             >
-              <option value="" disabled>Select priority</option>
+              <option value="" disabled>
+                Select priority
+              </option>
               <option value="High">High</option>
               <option value="Medium">Medium</option>
               <option value="Low">Low</option>
             </select>
           </div>
           <button type="submit">Submit</button>
-          <button type="button" onClick={toggleForm}>Cancel</button>
+          <button type="button" onClick={toggleForm}>
+            Cancel
+          </button>
         </form>
       )}
-      <h3>Active Projects</h3>
-      {!isFormVisible && (
-        <div className={styles.projectsContainer}>
-          {projects.map((project) => (
-            <div key={project.id} className={styles.projectCard}>
-              <p><strong>Project Name:</strong> {project.name}</p>
-              <p><strong>Due Date:</strong> {project.dueDate}</p>
-              <p><strong>Status:</strong> {project.status}</p>
-              <p><strong>Progress:</strong> [{`=`.repeat(project.progress / 10)}{`-`.repeat(10 - project.progress / 10)}] {project.progress}% Complete</p>
-              <p><strong>Priority:</strong> {project.priority}</p>
-              <button onClick={() => handleViewTasks(project.id)}>View Tasks</button>
 
-            </div>
-          ))}
+      <h3 className={styles.activeProjects}>Active Projects</h3>
+
+      {/* Projects list */}
+
+
+      {/* Show the list of projects */}
+      {!isFormVisible && (
+  isLoading ? (
+    <div>Loading projects...</div>
+  ) : (
+    <div className={styles.projectsContainer}>
+      {projects.map((project) => (
+        <div key={project.id} className={styles.projectCard}>
+          <p>
+            <strong>Project Name:</strong> {project.name}
+          </p>
+          <p>
+            <strong>Due Date:</strong> {project.dueDate}
+          </p>
+          <p>
+            <strong>Status:</strong> {project.status}
+          </p>
+          <p>
+            <strong>Priority:</strong> {project.priority}
+          </p>
+          <p>
+          </p>
+          <div className={styles.buttonContainer}>
+            <button
+              className={styles.viewTasks}
+              onClick={() => handleViewTasks(project.id)} // Use navigate to view tasks
+            >
+              View Tasks
+            </button>
+            <button
+              className={styles.deleteButton}
+              onClick={() => deleteProject(project.id)} // Deleting a project
+            >
+              Delete Project
+            </button>
+          </div>
         </div>
-      )}
-    </>
+      ))}
+    </div>
+  )
+)}
+        
+    </div>
   );
 };
 
