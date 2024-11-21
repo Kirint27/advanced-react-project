@@ -1,11 +1,9 @@
 import React from "react";
 import styles from "./SideBar.module.scss";
 import useLogin from '../../services/login.service'; // Adjust the path as needed
-import { useNavigate } from "react-router-dom"; // Import useNavigate for redirecting
 import { getAuth, signOut } from "firebase/auth"; // Import Firebase signOut and getAuth
 
-const SideBar = () => {
-  const navigate = useNavigate(); // For navigation after sign-out
+const SideBar = ({handleLogout}) => {
 
   const { user,signOut } = useLogin();
 
@@ -20,7 +18,7 @@ const SideBar = () => {
 
 
 <li className={styles.signOut}>
-<a href="/" onClick={signOut}>Sign Out</a>        </li>
+<a href="/" onClick={handleLogout}>Sign Out</a>        </li>
 
 </ul>
     </div>

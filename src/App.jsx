@@ -1,26 +1,67 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; // Corrected imports
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Projects from "./contianers/Projects/Projects";
 import Dashboard from "./contianers/Dashboard/Dashboard";
 import KanbanBoard from "./components/Kaban/Kaban";
-import Login from "./contianers/Login";
-/**
- * App component that renders the main routes of the application.
- * 
- * @returns {JSX.Element} The JSX element representing the App component.
- */
-const App = () => {
-  
-  return (
-    <Router>  {/* Ensure Router is wrapping everything */}
-      <Routes>  {/* Routes is used to define path-to-component mappings */}
-      <Route path="" element={<Login />} />
-      <Route path="/dashboard" element={<Dashboard />} />
+import Login from "./contianers/Login/Login";
+import ProtectedRoute from "./components/ProtectedRoutes";
+import useLogin from "./services/login.service";
+import SideBar from "./components/SideBar/SideBar";
+import { useNavigate } from "react-router-dom";
 
-        <Route path="/projects" element={<Projects />} />
-        <Route path="/project/:projectId/tasks" element={<KanbanBoard />} />
+const App = () => {
+  const { user, loading, logout } = useLogin();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // Navigate to the login page after logout
+    } catch (error) {
+      console.error("Error logging out: ", error);
+    }
+  };
+
+  return (
+    <Router>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            user ? <Navigate to="/dashboard" /> : <Login />
+          }
+        />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute user={user}>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects"
+          element={
+            <ProtectedRoute user={user}>
+              <Projects />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/project/:projectId/tasks"
+          element={
+            <ProtectedRoute user={user}>
+              <KanbanBoard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Other routes */}
+
       </Routes>
+      {user && <SideBar handleLogout={handleLogout} />}
     </Router>
   );
 };
+
 export default App;
