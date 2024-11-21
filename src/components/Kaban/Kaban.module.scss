@@ -1,20 +1,104 @@
 .kanbanBoard {
-    padding: 20px;
-  
-    .columns {
-      display: flex;
-      justify-content: space-between;
-  
-      .column {
-        flex: 1;
-        margin: 0 10px;
-        background: #f0f0f0;
-        padding: 10px;
-        border-radius: 5px;
-  
-        h4 {
-          text-align: center;
-        }
-    }
+  display: flex;
+  flex-direction: column;
+  margin: 20px;
 }
+
+.kanbanHeader {
+  text-align: center;
+  margin-bottom: 20px;
+
+
+}
+
+.kabanTitle{
+  margin-left: 40% !important;
+}
+
+.kanbanColumns {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.kanbanColumn {
+  flex: 1;
+  margin: 0 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.columnTitle {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 10px;
+  color: black; /* Ensure the column title is visible */
+}
+
+.emptyMessage {
+  text-align: 40%;
+  color: #888;
+}
+
+.task {
+  background-color: #e0e0e0;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.task:hover {
+  background-color: #d0d0d0;
+}
+  .toggleButton{
+    width: 200px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+  }
+  .taskForm{
+    background-color: #f9f9f9; // Light background for the form
+    border-radius: 8px; // Rounded corners
+    padding: 20px; // Padding inside the form
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); // Soft shadow
+    max-width: 400px; // Limit width
+    margin: 40px auto; // Center the form
+}
+  
+.taskForm input[type="text"],
+.taskForm input[type="date"],
+.taskForm textarea
+{
+    width: 90%; // Full width
+    padding: 10px; // Padding inside inputs
+    margin-bottom: 15px; // Space below inputs
+    border: 1px solid #bdc3c7; // Light border
+    border-radius: 4px; // Slightly rounded corners
+}
+.assignedTo{
+  margin-bottom: 15px; // Space below inputs
+
+}
+.cancelButton {
+  margin-left: 20px;
+}
+.backLink {
+
+  margin-top: 0px; /* 100px from the top of the page */
+  font-size: 16px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+@media only screen and (max-width: 768px) {
+.kanbanColumns{
+display: grid;
+grid-template-columns: repeat(1, 1fr);
+gap: 20px;
+}
+
 }

@@ -42,3 +42,10 @@ ul {
     color: #d32f2f; // Red color for sign-out for emphasis
   }
 }
+
+@media only screen and (max-width: 768px) {
+.sidebar{
+  width: 100px;
+  
+}
+}

@@ -5,14 +5,16 @@ import SideBar from '../../components/SideBar/SideBar';
 import styles from './Dashboard.module.scss';
 import useProjects from '../../services/project.service';
 import'../../index.css';
-const Dashboard = () => {
-  const { user } = useLogin(); // Use the custom hook
-  const { activeProjectsCount, getProjects } = useProjects(); // Use the custom hook
+import { useLocation } from '@reach/router'; // Import useLocation from Reach Router
 
-  // Log the user object to check its value
-  console.log(user);
-  const projects = getProjects();
-  console.log('Projects:', projects);
+const Dashboard = () => {
+  const { user } = useLogin()
+
+   // Use the custom hook
+  const { activeProjectsCount } = useProjects(); // Corrected variable name
+  console.log("Active Projects Count:", activeProjectsCount);
+
+ // Log the projects prop
   return (
     <>
     <h2 >Welcome, {user ? user.displayName || user.email : 'Guest'}!</h2>
@@ -34,8 +36,6 @@ const Dashboard = () => {
     <SideBar />   
     <h3 className={styles.header}>Notifications</h3>
 
-    <h3 style={{ marginTop: '200px' }} className={styles.header}>Active Projects</h3>
-    <h3 className={styles.header}>Upcoming Deadlines</h3>
 
   </>
   );
