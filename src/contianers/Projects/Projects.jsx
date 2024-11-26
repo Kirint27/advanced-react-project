@@ -6,8 +6,9 @@ import { useNavigate } from "react-router-dom"; // Import useNavigate from react
 import { db } from "../../firebase";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { auth } from '../../firebase';
+
 const Projects = () => {
-  const { deleteProject, fetchProjects,user } = useProjects();
+  const { deleteProject, fetchProjects, user, updateProjectStatus } = useProjects();
   const navigate = useNavigate(); // Initialize navigate
 
   const [isFormVisible, setIsFormVisible] = useState(false);
@@ -17,49 +18,86 @@ const Projects = () => {
   const [projectDescription, setProjectDescription] = useState("");
   const [priority, setPriority] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [selectedUserEmail, setSelectedUserEmail] = useState("");
+
   const currentUser = auth.currentUser;  // Get the current logged-in user
 
+  // Toggle form visibility
   const toggleForm = () => {
     setIsFormVisible(!isFormVisible);
   };
 
+  // Fetch projects only when the component mounts (and when the user changes)
   useEffect(() => {
-    fetchProjects().then((projectsData) => {
-      setProjects(projectsData);
-      setIsLoading(false);
-    });
-  }, [currentUser, fetchProjects]);
+    if (currentUser) {
+      fetchProjects().then((projectsData) => {
+        setProjects(projectsData);
+        setIsLoading(false);
+      });
+    } else {
+      setIsLoading(false); // No user, stop loading
+    }
+  }, [currentUser]); // Only run once when component mounts or when user changes
+
+  // Handle form submission (adding new project)
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const emails = selectedUserEmail.split(",");
+
     const newProject = {
       name: projectName,
       description: projectDescription,
       dueDate: dueDate || "MM/DD/YYYY",
-
+      status: "Not Started", // Default to "Not Started"
       priority,
-  userId: currentUser && currentUser.uid,
-
+      userId: currentUser && currentUser.uid,
+      members: selectedUsers,
+      userEmails: emails.map((email) => email.trim()),
     };
+
     addDoc(collection(db, "projects"), newProject)
       .then((docRef) => {
         console.log("Project added successfully with ID:", docRef.id);
+
+        // Directly update the local state to avoid refetching from Firestore
+        setProjects((prevProjects) => [
+          ...prevProjects,
+          { id: docRef.id, ...newProject },
+        ]);
+
         setIsFormVisible(false);
         setProjectName("");
         setProjectDescription("");
         setDueDate("");
         setPriority("");
-        fetchProjects(); // Refresh project list
+        setSelectedUsers([]);
+        setSelectedUserEmail("");
       })
       .catch((error) => {
         console.error("Error adding project: ", error);
       });
   };
 
+  // Handle viewing tasks (navigate to the project's tasks page)
   const handleViewTasks = (projectId) => {
-    // Navigate to the project tasks page using react-router-dom's navigate function
     navigate(`/project/${projectId}/tasks`);
   };
 
+  // Delete project (update the local state instead of refetching)
+  const handleDeleteProject = (projectId) => {
+    deleteProject(projectId)
+      .then(() => {
+        // Directly remove the project from the state to reflect the deletion
+        setProjects((prevProjects) =>
+          prevProjects.filter((project) => project.id !== projectId)
+        );
+      })
+      .catch((error) => {
+        console.error("Error deleting project: ", error);
+      });
+  };
 
   return (
     <div className={styles.projects}>
@@ -71,6 +109,7 @@ const Projects = () => {
           Create a new project
         </button>
       )}
+
       {isFormVisible && (
         <form onSubmit={handleSubmit} className={styles.projectForm}>
           <h3>Add New Project</h3>
@@ -114,6 +153,16 @@ const Projects = () => {
               <option value="Low">Low</option>
             </select>
           </div>
+
+          <div>
+            <label>Project Members:</label>
+            <input
+              type="text"
+              value={selectedUserEmail}
+              onChange={(e) => setSelectedUserEmail(e.target.value)}
+              placeholder="Add the emails of project members separated by commas"
+            />
+          </div>
           <button type="submit">Submit</button>
           <button type="button" onClick={toggleForm}>
             Cancel
@@ -123,51 +172,44 @@ const Projects = () => {
 
       <h3 className={styles.activeProjects}>Active Projects</h3>
 
-      {/* Projects list */}
-
-
-      {/* Show the list of projects */}
       {!isFormVisible && (
-  isLoading ? (
-    <div>Loading projects...</div>
-  ) : (
-    <div className={styles.projectsContainer}>
-      {projects.map((project) => (
-        <div key={project.id} className={styles.projectCard}>
-          <p>
-            <strong>Project Name:</strong> {project.name}
-          </p>
-          <p>
-            <strong>Due Date:</strong> {project.dueDate}
-          </p>
-          <p>
-            <strong>Status:</strong> {project.status}
-          </p>
-          <p>
-            <strong>Priority:</strong> {project.priority}
-          </p>
-          <p>
-          </p>
-          <div className={styles.buttonContainer}>
-            <button
-              className={styles.viewTasks}
-              onClick={() => handleViewTasks(project.id)} // Use navigate to view tasks
-            >
-              View Tasks
-            </button>
-            <button
-              className={styles.deleteButton}
-              onClick={() => deleteProject(project.id)} // Deleting a project
-            >
-              Delete Project
-            </button>
+        isLoading ? (
+          <div>Loading projects...</div>
+        ) : (
+          <div className={styles.projectsContainer}>
+            {projects.map((project) => (
+              <div key={project.id} className={styles.projectCard}>
+                <p>
+                  <strong>Project Name:</strong> {project.name}
+                </p>
+                <p>
+                  <strong>Due Date:</strong> {project.dueDate}
+                </p>
+                <p>
+                  <strong>Status:</strong> {project?.status}
+                </p>
+                <p>
+                  <strong>Priority:</strong> {project.priority}
+                </p>
+                <div className={styles.buttonContainer}>
+                  <button
+                    className={styles.viewTasks}
+                    onClick={() => handleViewTasks(project.id)}
+                  >
+                    View Tasks
+                  </button>
+                  <button
+                    className={styles.deleteButton}
+                    onClick={() => handleDeleteProject(project.id)}
+                  >
+                    Delete Project
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      ))}
-    </div>
-  )
-)}
-        
+        )
+      )}
     </div>
   );
 };
