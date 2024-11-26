@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { db, auth } from "../firebase";
 import {
   doc,
@@ -7,34 +7,55 @@ import {
   getDocs,
   query,
   where,
+  or,
+  updateDoc
 } from "firebase/firestore";
 
 const useProjects = () => {
   const [activeProjectsCount, setActiveProjectsCount] = useState(0);
   const [projects, setProjects] = useState([]); // State for storing projects
   const [isLoading, setIsLoading] = useState(true); // Loading state
+  const hasFetchedData = useRef(false); // Ref to track if data has been fetched
 
   // Fetch projects for the logged-in user
   const fetchProjects = () => {
-    const currentUser = auth.currentUser
+    const currentUser = auth.currentUser;
     if (!currentUser) {
       console.error("No user is authenticated");
       setIsLoading(false); // Set loading to false if no user is authenticated
       return Promise.resolve([]); // Return an empty array if no user
     }
-    const q = query(
+
+    // Only fetch data if not already fetched
+    if (hasFetchedData.current) {
+      setIsLoading(false); // Stop loading if data is already fetched
+      return Promise.resolve(projects); // Return cached projects if already fetched
+    }
+
+    const q1 = query(
       collection(db, "projects"),
       where("userId", "==", currentUser.uid)
-    );
-    return getDocs(q)
-      .then((querySnapshot) => {
-        const projectsArray = querySnapshot.docs.map((doc) => ({
+
+      );
+      const q2 = query(
+        collection(db, "projects"),
+        where("userEmails", "array-contains", currentUser.email)
+      );
+  
+    return Promise.all([getDocs(q1), getDocs(q2)])
+      .then(([querySnapshot1, querySnapshot2]) => {
+        const projectsArray = querySnapshot1.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-        }));
-
+        }))
+       .concat(querySnapshot2.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        })))
+  
         // Set projects state and stop loading
         setProjects(projectsArray);
+        hasFetchedData.current = true; // Mark as fetched
         setIsLoading(false);
         return projectsArray; // Return the projects array
       })
@@ -88,13 +109,30 @@ const useProjects = () => {
     }
   };
 
+  // Update project status
+  const updateProjectStatus = (projectId, newStatus) => {
+    const projectRef = doc(db, "projects", projectId); // Get reference to the project document
+
+    return updateDoc(projectRef, {
+      status: newStatus, // Update the status field
+    })
+      .then(() => {
+        console.log(`Project status updated to: ${newStatus}`);
+      })
+      .catch((error) => {
+        console.error("Error updating project status:", error);
+        throw error; // Throw error to be handled by the calling function
+      });
+  };
+
   return {
     addProject,
     activeProjectsCount,
     projects, // Return the projects state
     isLoading,
     deleteProject,
-    fetchProjects, // Provide the fetchProjects function if needed elsewhere
+    fetchProjects, 
+    updateProjectStatus // Provide the updateProjectStatus function for use elsewhere
   };
 };
 
