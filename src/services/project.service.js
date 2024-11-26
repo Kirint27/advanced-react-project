@@ -25,7 +25,7 @@ const useProjects = () => {
       setIsLoading(false); // Set loading to false if no user is authenticated
       return Promise.resolve([]); // Return an empty array if no user
     }
-
+console.log(currentUser)
     // Only fetch data if not already fetched
     if (hasFetchedData.current) {
       setIsLoading(false); // Stop loading if data is already fetched
@@ -39,8 +39,8 @@ const useProjects = () => {
       );
       const q2 = query(
         collection(db, "projects"),
-        where("userEmails", "array-contains", currentUser.email)
-      );
+        where("memberNames", "array-contains", currentUser.displayName)
+        );
   
     return Promise.all([getDocs(q1), getDocs(q2)])
       .then(([querySnapshot1, querySnapshot2]) => {

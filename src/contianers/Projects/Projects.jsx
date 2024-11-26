@@ -19,8 +19,7 @@ const Projects = () => {
   const [priority, setPriority] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedUsers, setSelectedUsers] = useState([]);
-  const [selectedUserEmail, setSelectedUserEmail] = useState("");
-
+const[selectedUserNames, setSelectedUserNames] = useState('');
   const currentUser = auth.currentUser;  // Get the current logged-in user
 
   // Toggle form visibility
@@ -43,9 +42,9 @@ const Projects = () => {
   // Handle form submission (adding new project)
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    const emails = selectedUserEmail.split(",");
-
+  
+    const memberNames = selectedUserNames.split(",");
+  
     const newProject = {
       name: projectName,
       description: projectDescription,
@@ -53,27 +52,25 @@ const Projects = () => {
       status: "Not Started", // Default to "Not Started"
       priority,
       userId: currentUser && currentUser.uid,
-      members: selectedUsers,
-      userEmails: emails.map((email) => email.trim()),
+      memberNames: memberNames.map((name) => name.trim()),
     };
-
+  
     addDoc(collection(db, "projects"), newProject)
       .then((docRef) => {
         console.log("Project added successfully with ID:", docRef.id);
-
+  
         // Directly update the local state to avoid refetching from Firestore
         setProjects((prevProjects) => [
           ...prevProjects,
           { id: docRef.id, ...newProject },
         ]);
-
+  
         setIsFormVisible(false);
         setProjectName("");
         setProjectDescription("");
         setDueDate("");
         setPriority("");
-        setSelectedUsers([]);
-        setSelectedUserEmail("");
+        setSelectedUserNames("");
       })
       .catch((error) => {
         console.error("Error adding project: ", error);
@@ -158,9 +155,9 @@ const Projects = () => {
             <label>Project Members:</label>
             <input
               type="text"
-              value={selectedUserEmail}
-              onChange={(e) => setSelectedUserEmail(e.target.value)}
-              placeholder="Add the emails of project members separated by commas"
+              value={selectedUserNames}
+              onChange={(e) => selectedUserNames(e.target.value)}
+              placeholder="Add the names of project members separated by commas"
             />
           </div>
           <button type="submit">Submit</button>
