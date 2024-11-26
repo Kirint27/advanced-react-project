@@ -43,9 +43,10 @@ ul {
   }
 }
 
-@media only screen and (max-width: 768px) {
+@media only screen and (max-width: 990px) {
 .sidebar{
-  width: 100px;
-  
+  width: 90px;
+  h2{
+margin-left: 10px;  }
 }
 }

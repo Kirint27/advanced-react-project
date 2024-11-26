@@ -1,34 +1,45 @@
+// Define variables for spacers and gutters
 $spacer: 20px;
 $gutter: 40px;
 
+// General button styles
 .button {
-  margin-left: 300px!important;
+  margin-left: 300px; // Use specific margin instead of `!important`
 }
 
+// Button container for flex layout
 .buttonContainer {
   margin-left: $gutter;
+  display: flex; // Ensure flex container behavior
+  flex-direction: row; // Default flex direction for larger screens
+  gap: $spacer; // Add spacing between buttons
 }
 
+// View tasks button with fixed width
 .viewTasks {
   width: 100px;
 }
 
+// Delete button with specific background color and margin
 .deleteButton {
   margin-left: $spacer;
   width: fit-content;
   background-color: red;
-  color:#f9f9f9;
+  color: #f9f9f9;
 }
 
+// Dashboard visibility hidden (to hide or show dynamically via JS)
 .dashboard {
   visibility: hidden;
 }
 
+// Active projects section with margin
 .activeProjects {
   margin-left: $gutter;
   margin-top: $spacer;
 }
 
+// Project form styling (background, border-radius, padding, shadow)
 .projectForm {
   background-color: #f9f9f9;
   border-radius: 8px;
@@ -38,14 +49,16 @@ $gutter: 40px;
   margin: $gutter auto;
 }
 
+// Projects container layout with flexbox
 .projectsContainer {
   display: flex;
   flex-wrap: wrap;
   gap: $spacer;
   padding: $spacer;
-  margin-left: 250px;
+  margin-left: 250px; // Add margin for left alignment
 }
 
+// Each project card layout
 .projectCard {
   background-color: #f1f1f1;
   border: 1px solid #bdc3c7;
@@ -57,6 +70,7 @@ $gutter: 40px;
   flex-direction: column;
 }
 
+// Project form header and label styling
 .projectForm h3 {
   margin-bottom: $spacer;
   color: #2c3e50;
@@ -68,6 +82,7 @@ $gutter: 40px;
   color: #34495e;
 }
 
+// Form input and select fields styling
 .projectForm input[type="text"],
 .projectForm input[type="date"],
 .projectForm textarea,
@@ -80,11 +95,13 @@ $gutter: 40px;
   font-size: 16px;
 }
 
+// Project form textarea adjustments for vertical resize
 .projectForm textarea {
   resize: vertical;
   min-height: 80px;
 }
 
+// Project form button styling
 .projectForm button {
   background-color: #2980b9;
   color: white;
@@ -97,28 +114,34 @@ $gutter: 40px;
   transition: background-color 0.3s;
 }
 
+// Media query for smaller screen sizes (max-width: 768px)
 @media only screen and (max-width: 768px) {
-.activeProjects{
-
-     margin-left: 120px;
-    }
-  .projects {
-    margin-left: $gutter;
-  }
-  .projectsContainer{
-    margin-left: 100px!important;
+  
+  // Adjust margins for active projects
+  .activeProjects {
+    margin-left: 120px;
   }
 
-  .button{
-    margin-left: 120px!important;
+  // Adjust margins for project container
+  .projectsContainer {
+    margin-left: 0; // Remove left margin for smaller screens
   }
-.buttonContainer{
-    flex-direction: column !important;
-margin-left: 0!important;
-gap: 20px;
-.deleteButton{
+
+  // Move button container layout to column for better spacing on smaller screens
+  .buttonContainer {
+    flex-direction: column;
+    margin-left: 0; // Remove left margin
+    gap: 20px; // Add gap between buttons vertically
+  }
+
+  // Adjust delete button margin for small screens
+  .deleteButton {
     margin: 5px;
-    margin-top: 20px!important;
-}
+    margin-top: 20px;
+  }
+
+  // Adjust general button margins for smaller screens
+  .button {
+    margin-left: 0; // Remove left margin
   }
 }
