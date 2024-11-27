@@ -1,98 +1,102 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // Use react-router-dom hooks
-import { getProject, getTasks, addTask } from "../../services/kaban.service";
-import Task from "../Tasks/Tasks"; // Import Task component
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  getProject,
+  getTasks,
+  addTask,
+  updateTaskStatus,
+} from "../../services/kaban.service";
+import Task from "../Tasks/Tasks";
 import styles from "./Kaban.module.scss";
+import useProjects from "../../services/project.service";
 
 const KanbanBoard = () => {
-  const { projectId } = useParams(); // Get the project ID from the URL
-  const [project, setProject] = useState(null); // State for project data
+  const { projectId } = useParams();
+  const { updateProjectStatus } = useProjects();
+  const navigate = useNavigate();
+  const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
-  const [endDate, setEndDate] = useState("");
-  const [newTask, setNewTask] = useState({
-    title: "",
-    description: "",
-    status: "", // Ensure status is initialized correctly
-  });
+  const [newTask, setNewTask] = useState({});
   const [showForm, setShowForm] = useState(false);
   const columns = {
     todo: { name: "To-Do" },
     inProgress: { name: "In Progress" },
     done: { name: "Done" },
   };
+  const members = project?.memberNames;
 
-  const navigate = useNavigate(); // Use useNavigate for programmatic navigation
-
+  console.log("Members:", members);
   useEffect(() => {
-    console.log("Project ID:", projectId); // Check if the ID changes when navigating
-    // Fetch project and tasks based on projectId
     getProject(projectId)
-      .then((projectData) => {
-        setProject(projectData);
-      })
-      .catch((error) => {
-        console.error("Error fetching project:", error);
-      });
+      .then((projectData) => setProject(projectData))
+      .catch((error) => console.error("Error fetching project:", error));
 
     getTasks(projectId)
-      .then((taskData) => {
-        setTasks(taskData);
-        console.log("Tasks:", taskData);
-      })
-      .catch((error) => {
-        console.error("Error fetching tasks:", error);
-      });
-  }, [projectId]); // Ensure it runs whenever the `projectId` changes
+      .then((taskData) => setTasks(taskData))
+      .catch((error) => console.error("Error fetching tasks:", error));
+  }, [projectId]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewTask({ ...newTask, [name]: value });
-  };
-
-  const toggleFormVisibility = () => {
-    setShowForm(!showForm);
+    if (name === "assignedTo") {
+      const selectedOptions = [...e.target.selectedOptions].map(
+        (option) => option.value
+      );
+      setNewTask({ ...newTask, assignedTo: selectedOptions });
+    } else {
+      setNewTask({ ...newTask, [name]: value });
+    }
   };
 
   const handleAddTask = (e) => {
     e.preventDefault();
-    const taskToAdd = {
-      title: newTask.title || "",
-      description: newTask.description || "",
-      status: newTask.status || "todo",
-      createdAt: new Date(),
-      dueDate: endDate || "",
-      assignedTo: newTask.assignedTo || "",
-    };
+    const taskToAdd = { ...newTask, createdAt: new Date(), status:"todo" };
     addTask(projectId, taskToAdd)
       .then((docId) => {
         console.log("Task added successfully with ID:", docId);
+        getTasks(projectId)
+          .then((tasks) => {
+            setTasks(tasks);
+          })
+          .catch((error) => console.error("Error fetching tasks:", error));
         setNewTask({}); // Reset task form
         setShowForm(false);
       })
-      .catch((error) => {
-        console.error("Error adding task:", error);
-      });
+      .catch((error) => console.error("Error adding task:", error));
   };
-
+  const handleCancel = () => {
+    setShowForm(false); // add this line
+  };
   const handleMoveTask = (taskId, newStatus) => {
-    const newTasks = tasks.map((task) => {
-      if (task.id === taskId) {
-        return { ...task, status: newStatus };
-      }
-      return task;
-    });
-
-    setTasks(newTasks);
+    updateTaskStatus(projectId, taskId, newStatus)
+      .then(() => {
+        const newTasks = tasks.map((task) => {
+          if (task.id === taskId) {
+            return { ...task, status: newStatus };
+          }
+          return task;
+        });
+        setTasks(newTasks);
+        updateProjectStatusBasedOnTasks();
+      })
+      .catch((error) => console.error("Error updating task status:", error));
   };
 
-  const allTasksCompleted = () => {
-    const completedTasks = tasks.filter((task) => task.status === "done");
-    return completedTasks.length === tasks.length && completedTasks.length > 0;
+  const updateProjectStatusBasedOnTasks = () => {
+    getTasks(projectId)
+      .then((tasks) => {
+        const allTasksCompleted = tasks.every((task) => task.status === "done");
+        const projectStatus = allTasksCompleted
+          ? "Completed"
+          : tasks.length === 0
+          ? "Not Started"
+          : "In Progress";
+        updateProjectStatus(projectId, projectStatus);
+      })
+      .catch((error) => console.error("Error updating project status:", error));
   };
-
-  const goBack = () => {
-    navigate("/projects"); // Use navigate to programmatically go back
-  };
+  console.log(tasks);
+  console.log(showForm);
 
   return (
     <div className={styles.kanbanBoard}>
@@ -101,12 +105,12 @@ const KanbanBoard = () => {
           <div className={styles.kanbanHeader}>
             <h3 className={styles.kanbanTitle}>{project.name}</h3>
           </div>
-          <a onClick={goBack} className={styles.backLink}>
+          <a onClick={() => navigate("/projects")} className={styles.backLink}>
             ← Back to Projects
           </a>
           {!showForm && (
             <button
-              onClick={toggleFormVisibility}
+              onClick={() => setShowForm(true)}
               className={styles.toggleButton}
             >
               Add New Task
@@ -125,7 +129,6 @@ const KanbanBoard = () => {
                   required
                 />
               </div>
-
               <div>
                 <label>Description:</label>
                 <textarea
@@ -136,18 +139,26 @@ const KanbanBoard = () => {
                   required
                 />
               </div>
-              <div>
-                <label>Due Date:</label>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
+              <div className={styles.inputGroup}>
+                <label>Assigned to:</label>
+                <select
+                  multiple
+                  name="assignedTo"
+                  onChange={handleInputChange}
+                  className={styles.assignedTo}
+                  required
+                >
+                  {members.map((member) => (
+                    <option key={member} value={member}>
+                      {member}
+                    </option>
+                  ))}
+                </select>
               </div>
               <button type="submit">Add Task</button>
               <button
                 type="button"
-                onClick={toggleFormVisibility}
+                onClick={() => setShowForm(false)}
                 className={styles.cancelButton}
               >
                 Cancel
@@ -155,6 +166,7 @@ const KanbanBoard = () => {
             </form>
           )}
 
+          
           <div className={styles.kanbanColumns}>
             {Object.keys(columns).map((column) => (
               <div key={column} className={styles.kanbanColumn}>

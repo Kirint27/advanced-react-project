@@ -3,12 +3,18 @@ import React from 'react';
 import styles from './Tasks.module.scss';
 
 const Task = ({ task, columns, handleMoveTask }) => {
+
   return (
     <div className={styles.taskCard}>
       <h5 className={styles.taskTitle}>{task.title}</h5>
       <p>Details: {task.description}</p>
       <p>Due Date: {task.dueDate}</p>
-      <p> Move To: {task.assignedTo}</p>
+      <p>Assigned To: <ul>
+  {task.assignedTo.map((name) => (
+    <li key={name}>{name}</li>
+  ))}
+</ul></p>
+      <p> Move To:</p>
 
       <select
         value={task.status}

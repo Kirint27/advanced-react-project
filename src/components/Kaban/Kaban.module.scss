@@ -60,6 +60,8 @@
     width: 200px;
     margin-top: 30px;
     margin-bottom: 30px;
+    margin-left: 300px;
+    
   }
   .taskForm{
     background-color: #f9f9f9; // Light background for the form
@@ -80,10 +82,33 @@
     border: 1px solid #bdc3c7; // Light border
     border-radius: 4px; // Slightly rounded corners
 }
-.assignedTo{
-  margin-bottom: 15px; // Space below inputs
-
+.inputGroup {
+  display: flex;
+  flex-direction: column; /* This ensures label is above select */
+  margin-bottom: 16px; /* Space between this field and the next field */
 }
+
+label {
+  margin-bottom: 8px; /* Adds some space between label and the select box */
+  font-size: 14px; /* Adjust label font size */
+  color: #333; /* Set label color */
+}
+
+select {
+  padding: 8px; /* Add padding inside select box */
+  font-size: 14px; /* Font size for the select box */
+  border: 1px solid #ccc; /* Border for the select */
+  border-radius: 4px; /* Rounded corners */
+  background-color: #fff; /* Background color */
+  appearance: none; /* Remove default dropdown arrow for custom styling */
+  cursor: pointer;
+
+  &:focus {
+    outline: none; /* Remove the default focus outline */
+    border-color: #007bff; /* Change border color on focus */
+  }
+}
+
 .cancelButton {
   margin-left: 20px;
 }
