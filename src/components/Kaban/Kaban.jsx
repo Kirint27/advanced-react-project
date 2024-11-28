@@ -10,14 +10,17 @@ import Task from "../Tasks/Tasks";
 import styles from "./Kaban.module.scss";
 import useProjects from "../../services/project.service";
 
-const KanbanBoard = () => {
+
+
+const KanbanBoard = (props) => {
   const { projectId } = useParams();
-  const { updateProjectStatus } = useProjects();
+  const { updateProjectStatus,updateProjectStatusBasedOnTasks } = useProjects();
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState({});
   const [showForm, setShowForm] = useState(false);
+
   const columns = {
     todo: { name: "To-Do" },
     inProgress: { name: "In Progress" },
@@ -67,38 +70,30 @@ const KanbanBoard = () => {
   const handleCancel = () => {
     setShowForm(false); // add this line
   };
-  const handleMoveTask = (taskId, newStatus) => {
-    updateTaskStatus(projectId, taskId, newStatus)
-      .then(() => {
-        const newTasks = tasks.map((task) => {
-          if (task.id === taskId) {
-            return { ...task, status: newStatus };
-          }
-          return task;
-        });
-        setTasks(newTasks);
-        updateProjectStatusBasedOnTasks();
-      })
-      .catch((error) => console.error("Error updating task status:", error));
-  };
+const handleMoveTask = (taskId, newStatus) => {
+  updateTaskStatus(projectId, taskId, newStatus)
+    .then(() => {
+      // Update local tasks state with the new task status
+      const newTasks = tasks.map((task) => {
+        if (task.id === taskId) {
+          return { ...task, status: newStatus };
+        }
+        return task;
+      });
 
-  const updateProjectStatusBasedOnTasks = () => {
-    getTasks(projectId)
-      .then((tasks) => {
-        const allTasksCompleted = tasks.every((task) => task.status === "done");
-        const projectStatus = allTasksCompleted
-          ? "Completed"
-          : tasks.length === 0
-          ? "Not Started"
-          : "In Progress";
-        updateProjectStatus(projectId, projectStatus);
-      })
-      .catch((error) => console.error("Error updating project status:", error));
-  };
-  console.log(tasks);
-  console.log(showForm);
+      setTasks(newTasks);
+      // After task status change, update project status
+      updateProjectStatusBasedOnTasks();
+    })
+    .catch((error) => console.error("Error updating task status:", error));
+};
 
-  return (
+
+
+
+
+return(
+
     <div className={styles.kanbanBoard}>
       {project ? (
         <>

@@ -5,10 +5,12 @@ import SideBar from "../../components/SideBar/SideBar";
 import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom
 import { db } from "../../firebase";
 import { collection, addDoc, getDocs } from "firebase/firestore";
-import { auth } from '../../firebase';
+import { auth } from "../../firebase";
+import { getTasks, updateProjectStatus } from "../../services/kaban.service"; // Assuming you have a getTasks function
 
 const Projects = () => {
-  const { deleteProject, fetchProjects, user, updateProjectStatus } = useProjects();
+  const { deleteProject, fetchProjects, user, updateProjectStatus, updateProjectStatusBasedOnTasks } =
+    useProjects();
   const navigate = useNavigate(); // Initialize navigate
 
   const [isFormVisible, setIsFormVisible] = useState(false);
@@ -19,11 +21,11 @@ const Projects = () => {
   const [priority, setPriority] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedUsers, setSelectedUsers] = useState([]);
-const[selectedUserNames, setSelectedUserNames] = useState('');
-  const currentUser = auth.currentUser;  // Get the current logged-in user
+  const [selectedUserNames, setSelectedUserNames] = useState("");
+  const currentUser = auth.currentUser; // Get the current logged-in user
 
   // Toggle form visibility
-  const toggleForm = () => {
+  const toggleForm = ({ tasks }) => {
     setIsFormVisible(!isFormVisible);
   };
 
@@ -33,6 +35,9 @@ const[selectedUserNames, setSelectedUserNames] = useState('');
       fetchProjects().then((projectsData) => {
         setProjects(projectsData);
         setIsLoading(false);
+        projectsData.forEach((project) => {
+          updateProjectStatusBasedOnTasks(project.id);
+        });
       });
     } else {
       setIsLoading(false); // No user, stop loading
@@ -42,9 +47,9 @@ const[selectedUserNames, setSelectedUserNames] = useState('');
   // Handle form submission (adding new project)
   const handleSubmit = (e) => {
     e.preventDefault();
-  
+
     const memberNames = selectedUserNames.split(",");
-  
+
     const newProject = {
       name: projectName,
       description: projectDescription,
@@ -54,17 +59,16 @@ const[selectedUserNames, setSelectedUserNames] = useState('');
       userId: currentUser && currentUser.uid,
       memberNames: memberNames.map((name) => name.trim()),
     };
-  
     addDoc(collection(db, "projects"), newProject)
       .then((docRef) => {
         console.log("Project added successfully with ID:", docRef.id);
-  
+
         // Directly update the local state to avoid refetching from Firestore
         setProjects((prevProjects) => [
           ...prevProjects,
           { id: docRef.id, ...newProject },
         ]);
-  
+
         setIsFormVisible(false);
         setProjectName("");
         setProjectDescription("");
@@ -77,6 +81,7 @@ const[selectedUserNames, setSelectedUserNames] = useState('');
       });
   };
 
+  console.log(selectedUserNames);
   // Handle viewing tasks (navigate to the project's tasks page)
   const handleViewTasks = (projectId) => {
     navigate(`/project/${projectId}/tasks`);
@@ -96,6 +101,7 @@ const[selectedUserNames, setSelectedUserNames] = useState('');
       });
   };
 
+  
   return (
     <div className={styles.projects}>
       <h2>Projects</h2>
@@ -149,6 +155,7 @@ const[selectedUserNames, setSelectedUserNames] = useState('');
               <option value="Medium">Medium</option>
               <option value="Low">Low</option>
             </select>
+             
           </div>
 
           <div>
@@ -156,7 +163,7 @@ const[selectedUserNames, setSelectedUserNames] = useState('');
             <input
               type="text"
               value={selectedUserNames}
-              onChange={(e) => selectedUserNames(e.target.value)}
+              onChange={(e) => setSelectedUserNames(e.target.value)}
               placeholder="Add the names of project members separated by commas"
             />
           </div>
@@ -169,8 +176,8 @@ const[selectedUserNames, setSelectedUserNames] = useState('');
 
       <h3 className={styles.activeProjects}>Active Projects</h3>
 
-      {!isFormVisible && (
-        isLoading ? (
+      {!isFormVisible &&
+        (isLoading ? (
           <div>Loading projects...</div>
         ) : (
           <div className={styles.projectsContainer}>
@@ -187,6 +194,9 @@ const[selectedUserNames, setSelectedUserNames] = useState('');
                 </p>
                 <p>
                   <strong>Priority:</strong> {project.priority}
+                </p>
+                <p>
+                  <strong>Members:</strong> {project.memberNames}
                 </p>
                 <div className={styles.buttonContainer}>
                   <button
@@ -205,8 +215,7 @@ const[selectedUserNames, setSelectedUserNames] = useState('');
               </div>
             ))}
           </div>
-        )
-      )}
+        ))}
     </div>
   );
 };
