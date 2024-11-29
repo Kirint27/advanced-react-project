@@ -12,6 +12,8 @@ const Projects = () => {
   const { deleteProject, fetchProjects, user, updateProjectStatus, updateProjectStatusBasedOnTasks } =
     useProjects();
   const navigate = useNavigate(); // Initialize navigate
+  const [userSearch, setUserSearch] = useState(""); // State for the user's input in autocomplete
+  const [users, setUsers] = useState([]); // State for storing all users in Firestore
 
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [projects, setProjects] = useState([]);
@@ -44,12 +46,32 @@ const Projects = () => {
     }
   }, [currentUser]); // Only run once when component mounts or when user changes
 
+
+ useEffect(() => {
+  const fetchUsers = () => {
+    getDocs(collection(db, "users"))
+      .then((usersSnapshot) => {
+        const usersList = usersSnapshot.docs.map((doc) => doc.data());
+        setUsers(usersList);
+      })
+      .catch((error) => {
+        console.error("Error fetching users:", error);
+      });
+  };
+  fetchUsers();
+}, []);
   // Handle form submission (adding new project)
+
+const handleUserSearch = (e) => {
+  setUserSearch(e.target.value);
+};
+
+
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
     const memberNames = selectedUserNames.split(",");
-
     const newProject = {
       name: projectName,
       description: projectDescription,
@@ -57,7 +79,7 @@ const Projects = () => {
       status: "Not Started", // Default to "Not Started"
       priority,
       userId: currentUser && currentUser.uid,
-      memberNames: memberNames.map((name) => name.trim()),
+      memberNames: selectedUsers.map(user => user.displayName), // Store only the displayName in project
     };
     addDoc(collection(db, "projects"), newProject)
       .then((docRef) => {
@@ -82,6 +104,11 @@ const Projects = () => {
   };
 
   console.log(selectedUserNames);
+
+  const filteredUsers = users.filter(user => 
+    user.displayName.toLowerCase().includes(userSearch.toLowerCase())
+  );
+
   // Handle viewing tasks (navigate to the project's tasks page)
   const handleViewTasks = (projectId) => {
     navigate(`/project/${projectId}/tasks`);
@@ -161,11 +188,23 @@ const Projects = () => {
           <div>
             <label>Project Members:</label>
             <input
-              type="text"
-              value={selectedUserNames}
-              onChange={(e) => setSelectedUserNames(e.target.value)}
-              placeholder="Add the names of project members separated by commas"
-            />
+            type="text"
+            value={userSearch}
+            onChange={handleUserSearch}
+            placeholder="Search users"
+          />
+   {userSearch && (
+            <div className={styles.autocompleteResults}>
+              {filteredUsers.map(user => (
+                <div
+                  key={user.uid}
+                  className={styles.autocompleteItem}
+                >
+                  {user.displayName}
+                </div>
+              ))}
+            </div>
+          )}
           </div>
           <button type="submit">Submit</button>
           <button type="button" onClick={toggleForm}>
@@ -196,7 +235,7 @@ const Projects = () => {
                   <strong>Priority:</strong> {project.priority}
                 </p>
                 <p>
-                  <strong>Members:</strong> {project.memberNames}
+                <strong>Members:</strong> {project.memberNames.join(', ')}
                 </p>
                 <div className={styles.buttonContainer}>
                   <button

@@ -1,22 +1,24 @@
-import { useState, useEffect, useRef } from "react";
-import { db, auth } from "../firebase";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { getTasks } from "./kaban.service";
+import { useState, useEffect } from "react";
+import { db, auth } from "../firebase"; // Import the initialized Firestore instance
+import { collection, getDocs, query, where, deleteDoc, doc } from "firebase/firestore"; // Correct imports from Firebase v9 modular SDK
+import { getTasks } from "./kaban.service"; // Assuming this is your task service
+
 const useProjects = () => {
   const [activeProjectsCount, setActiveProjectsCount] = useState(0);
-  const [projects, setProjects] = useState([]); // State for storing projects
-  const [isLoading, setIsLoading] = useState(true); // Loading state
-  const [completedProjectsCount, setCompletedProjectsCount] = useState(0); // Track completed projects count
+  const [projects, setProjects] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [completedProjectsCount, setCompletedProjectsCount] = useState(0);
 
   // Fetch projects for the logged-in user
   const fetchProjects = () => {
     const currentUser = auth.currentUser;
     if (!currentUser) {
       console.error("No user is authenticated");
-      setIsLoading(false); // Set loading to false if no user is authenticated
-      return Promise.resolve([]); // Return an empty array if no user
+      setIsLoading(false);
+      return Promise.resolve([]);
     }
 
+    // Create query for projects where the user is either the owner or a member
     const q1 = query(
       collection(db, "projects"),
       where("userId", "==", currentUser.uid)
@@ -40,63 +42,78 @@ const useProjects = () => {
             }))
           );
 
-        // Set projects state and stop loading
         setProjects(projectsArray);
         setIsLoading(false);
-        return projectsArray; // Return the projects array
+        return projectsArray;
       })
       .catch((error) => {
         console.error("Error fetching projects:", error);
         setIsLoading(false);
-        return []; // Return an empty array in case of an error
+        return [];
       });
   };
 
-
-  const updateProjectStatusBasedOnTasks = (projectId,updateProjectStatus) => {
-    getTasks(projectId)  // Call getTasks with the specific projectId
+  const updateProjectStatusBasedOnTasks = (projectId, updateProjectStatus) => {
+    getTasks(projectId)
       .then((tasks) => {
-        // If there are no tasks, set the status to "Not Started"
-        const projectStatus = tasks.length === 0
-          ? "Not Started"  // Explicitly set to "Not Started" if there are no tasks
-          : tasks.every((task) => task.status === "done")
-          ? "Completed"  // If all tasks are completed, set status to "Completed"
-          : "In Progress";  // If there are tasks and not all are done, set status to "In Progress"
-    
-        // Update the project status only if it has changed
-        updateProjectStatus(projectId, projectStatus); // Update status in Firestore
+        const projectStatus =
+          tasks.length === 0
+            ? "Not Started"
+            : tasks.every((task) => task.status === "done")
+            ? "Completed"
+            : "In Progress";
+
+        // Update project status if necessary
+        updateProjectStatus(projectId, projectStatus);
       })
       .catch((error) => {
         console.error("Error updating project status:", error);
       });
   };
+  const deleteProject = (projectId) => {
+    const warningMessage =
+      "Are you sure you want to delete this project? All tasks and data associated with this project will be permanently deleted.";
+  
+    // Show a confirmation dialog
+    if (window.confirm(warningMessage)) {
+      const projectRef = doc(db, "projects", projectId); // Correct way to get a reference to a document
+  
+      // Using deleteDoc from the modular API to delete the document
+      return deleteDoc(projectRef)
+        .then(() => {
+          // Deletion successful, update the local state to reflect the deletion
+          return true;
+        })
+        .catch((error) => {
+          console.error("Error deleting project: ", error);
+          return false;
+        });
+    }
+  
+    // If user cancels, return a resolved promise to prevent further action
+    return Promise.resolve(false);
+  };
 
-
-  // Update the count of completed projects
   const updateCompletedProjectsCount = () => {
-    // Count how many projects have 'Completed' status
     const completedCount = projects.filter(
       (project) => project.status.trim() === "Completed"
     ).length;
 
-    // Update the state with the new count
     setCompletedProjectsCount(completedCount);
   };
 
-  // Update active projects count
   const updateProjectCount = () => {
     setActiveProjectsCount(projects.length);
   };
 
-  // Fetch projects and update the counts on mount
   useEffect(() => {
-    fetchProjects(); // Fetch projects when component mounts
-  }, []); // Empty dependency array ensures it runs once on mount
+    fetchProjects();
+  }, []);
 
   useEffect(() => {
-    updateProjectCount(); // Update active project count
-    updateCompletedProjectsCount(); // Update completed projects count
-  }, [projects]); // Runs whenever the projects array changes
+    updateProjectCount();
+    updateCompletedProjectsCount();
+  }, [projects]);
 
   return {
     activeProjectsCount,
@@ -105,6 +122,7 @@ const useProjects = () => {
     completedProjectsCount,
     updateProjectStatusBasedOnTasks,
     fetchProjects,
+    deleteProject,
   };
 };
 
