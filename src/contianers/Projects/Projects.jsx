@@ -29,6 +29,9 @@ const Projects = () => {
   // Toggle form visibility
   const toggleForm = ({ tasks }) => {
     setIsFormVisible(!isFormVisible);
+    setUserSearch(""); // Reset the user search input
+  setSelectedUsers([]); // Also reset the selected users
+  setSelectedUserNames(""); // And reset the selected user names
   };
 
   // Fetch projects only when the component mounts (and when the user changes)
@@ -79,7 +82,7 @@ const handleUserSearch = (e) => {
       status: "Not Started", // Default to "Not Started"
       priority,
       userId: currentUser && currentUser.uid,
-      memberNames: selectedUsers.map(user => user.displayName), // Store only the displayName in project
+      memberNames: selectedUsers.map((user) => user.displayName), // Use selectedUsers state
     };
     addDoc(collection(db, "projects"), newProject)
       .then((docRef) => {
@@ -96,7 +99,8 @@ const handleUserSearch = (e) => {
         setProjectDescription("");
         setDueDate("");
         setPriority("");
-        setSelectedUserNames("");
+        setSelectedUsers([]);
+        setUserSearch(""); // Also reset the user search input
       })
       .catch((error) => {
         console.error("Error adding project: ", error);
@@ -128,6 +132,7 @@ const handleUserSearch = (e) => {
       });
   };
 
+  console.log(projects);
   
   return (
     <div className={styles.projects}>
@@ -195,14 +200,25 @@ const handleUserSearch = (e) => {
           />
    {userSearch && (
             <div className={styles.autocompleteResults}>
-              {filteredUsers.map(user => (
-                <div
-                  key={user.uid}
-                  className={styles.autocompleteItem}
-                >
-                  {user.displayName}
-                </div>
-              ))}
+           {filteredUsers.map((user) => (
+  <div
+    key={user.uid}
+    className={styles.autocompleteItem}
+    onClick={() => {
+      if (!selectedUsers.some(user => selectedUsers.uid === user.uid)) {
+
+      setSelectedUsers((prevUsers) => [...prevUsers, user]);
+      setSelectedUserNames((prevNames) => `${prevNames}, ${user.displayName}`);
+      
+      }
+    }}
+  >
+    {user.displayName}
+  </div>
+))}
+              
+             
+      
             </div>
           )}
           </div>

@@ -103,7 +103,10 @@ const useProjects = () => {
   };
 
   const updateProjectCount = () => {
-    setActiveProjectsCount(projects.length);
+    const activeCount = projects.filter(
+      (project) => project.status.trim() !== "Completed"
+    ).length;
+    setActiveProjectsCount(activeCount);
   };
 
   useEffect(() => {
