@@ -163,6 +163,7 @@ const handleUserSearch = (e) => {
               value={projectDescription}
               onChange={(e) => setProjectDescription(e.target.value)}
               required
+              
             />
           </div>
           <div>

@@ -4,6 +4,7 @@ import {
   doc,
   getDocs,
   getDoc,
+  deleteDoc,
   addDoc,
   updateDoc,
 } from "firebase/firestore";
@@ -37,9 +38,9 @@ export const getTasks = (id) => {
     });
 };
 
-export const addTask = (id, task) => {
+export const addTask = (id) => {
   const tasksCollectionRef = collection(db, "projects", id, "tasks");
-  return addDoc(tasksCollectionRef, task)
+  return addDoc(tasksCollectionRef)
     .then((docRef) => {
       return docRef.id; // Return the ID of the newly added task
     })
@@ -47,7 +48,24 @@ export const addTask = (id, task) => {
       return Promise.reject(`Error adding task: ${error.message}`);
     });
 };
+export const deleteTask = (projectId, taskId) => {
+  if (!projectId || !taskId) {
+    console.error("Invalid projectId or taskId");
+    return Promise.reject("Invalid projectId or taskId");
+  }
 
+  const taskRef = doc(db, "projects", projectId, "tasks", taskId);
+
+  return deleteDoc(taskRef)
+    .then(() => {
+      console.log("Task deleted successfully");
+      return true;
+    })
+    .catch((error) => {
+      console.error("Error deleting task:", error);
+      throw error
+    })
+  }
 export const updateCompletedProjectsCount = () => {
   return getTasks()
     .then((allTasks) => {
