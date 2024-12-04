@@ -1,19 +1,80 @@
-// src/components/Task.js
-import React from 'react';
-import styles from './Tasks.module.scss';
+import React, { useState, useEffect } from "react";
+import styles from "./Tasks.module.scss";
+import {
+  getProject,
+  getTasks,
+  addTask,
+  updateTaskStatus,
+  deleteTask,
+} from "../../services/kaban.service";
 
-const Task = ({ task, columns, handleMoveTask }) => {
+const Task = ({
+  task,
+  columns,
+  handleMoveTask,
+  setTasks,
+  tasks,
+  projectId,
+}) => {
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  useEffect(() => {
+    console.log("Popup is now:", isPopupOpen ? "open" : "closed");
+  }, [isPopupOpen]); // This runs whenever isPopupOpen changes
+
+  const handleTaskClick = (taskId) => {
+    if (!isPopupOpen) {
+      console.log("Opening popup...");
+      setIsPopupOpen(true);
+    }
+  };
+  const handlePopupClose = () => {
+    setIsPopupOpen(false);
+    console.log(isPopupOpen);
+  };
+
+  const handelDeleteTask = (taskId) => {
+    console.log("Deleting task with ID:", taskId);
+      deleteTask(projectId, taskId) // Call deleteTask from service
+        .then(() => {
+          // Filter out the deleted task from the local tasks array
+          const updatedTasks = tasks.filter((task) => task.id !== taskId);
+          setTasks(updatedTasks); // Update the state in the parent component
+          console.log("Task deleted successfully");
+        })
+        .catch((error) => {
+          console.error("Error deleting task:", error);
+        });
+      
+    
+  };
 
   return (
-    <div className={styles.taskCard}>
-      <h5 className={styles.taskTitle}>{task.title}</h5>
-      <p>Details: {task.description}</p>
+    <div className={styles.taskCard} onClick={handleTaskClick}>
+      <h5 className={styles.taskTitle}>
+        {task.title.charAt(0).toUpperCase() + task.title.slice(1)}
+      </h5>
+
       <p>Due Date: {task.dueDate}</p>
-      <p>Assigned To: <ul>
-  {task.assignedTo.map((name) => (
-    <li key={name}>{name}</li>
-  ))}
-</ul></p>
+      <p>
+        Assigned To:
+        <ul>
+          {task.assignedTo.map((name) => (
+            <li key={name}>{name}</li>
+          ))}
+        </ul>
+      </p>
+
+      {isPopupOpen && (
+        <div className={styles.popup}>
+          <div className={styles.popupContent}>
+            <p>Details: {task.description}</p>
+            <button className={styles.closeButton} onClick={handlePopupClose}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
       <p> Move To:</p>
 
       <select
@@ -26,8 +87,14 @@ const Task = ({ task, columns, handleMoveTask }) => {
           </option>
         ))}
       </select>
+      <button
+        className={styles.deleteButton}
+        onClick={() => handelDeleteTask(task.id)}
+      >
+        Delete Task
+      </button>
     </div>
-  ); 
+  );
 };
 
 export default Task;

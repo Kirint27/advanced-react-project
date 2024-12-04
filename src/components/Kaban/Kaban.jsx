@@ -90,25 +90,24 @@ const handleMoveTask = (taskId, newStatus) => {
 
 
 
-
-
 return(
-
+  <>
+          <a onClick={() => navigate("/projects")} className={styles.backLink}>
+            ← Back to Projects
+          </a>
     <div className={styles.kanbanBoard}>
       {project ? (
         <>
           <div className={styles.kanbanHeader}>
             <h3 className={styles.kanbanTitle}>{project.name}</h3>
           </div>
-          <a onClick={() => navigate("/projects")} className={styles.backLink}>
-            ← Back to Projects
-          </a>
+
           {!showForm && (
             <button
               onClick={() => setShowForm(true)}
               className={styles.toggleButton}
             >
-              Add New Task
+               + Add New Task
             </button>
           )}
           {showForm && (
@@ -132,6 +131,8 @@ return(
                   onChange={handleInputChange}
                   className={styles.description}
                   required
+                  minLength={200}
+
                 />
               </div>
               <div className={styles.inputGroup}>
@@ -150,6 +151,16 @@ return(
                   ))}
                 </select>
               </div>
+              <div>
+    <label>Due Date:</label>
+    <input
+      type="date"
+      name="dueDate"
+      value={newTask.dueDate}
+      onChange={handleInputChange}
+      className={styles.dateInput}
+    />
+  </div>
               <button type="submit">Add Task</button>
               <button
                 type="button"
@@ -160,6 +171,7 @@ return(
               </button>
             </form>
           )}
+            <p className={styles.instructions}>Click on a task to view details about it</p>
 
           
           <div className={styles.kanbanColumns}>
@@ -189,7 +201,8 @@ return(
       ) : (
         <p>Loading project...</p>
       )}
-    </div>
+    </div
+    ></>
   );
 };
 
