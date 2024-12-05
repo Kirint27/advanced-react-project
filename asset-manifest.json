@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/taskflow.kirinthapar.co.uk/static/css/main.091a78e3.css",
+    "main.js": "/taskflow.kirinthapar.co.uk/static/js/main.bf83e3f3.js",
+    "static/js/453.393c227d.chunk.js": "/taskflow.kirinthapar.co.uk/static/js/453.393c227d.chunk.js",
+    "index.html": "/taskflow.kirinthapar.co.uk/index.html",
+    "main.091a78e3.css.map": "/taskflow.kirinthapar.co.uk/static/css/main.091a78e3.css.map",
+    "main.bf83e3f3.js.map": "/taskflow.kirinthapar.co.uk/static/js/main.bf83e3f3.js.map",
+    "453.393c227d.chunk.js.map": "/taskflow.kirinthapar.co.uk/static/js/453.393c227d.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.091a78e3.css",
+    "static/js/main.bf83e3f3.js"
+  ]
+}
