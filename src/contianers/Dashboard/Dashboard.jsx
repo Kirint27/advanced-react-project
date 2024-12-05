@@ -39,7 +39,6 @@ console.log("completedProjectsCount:", completedProjectsCount);
 
   // Notifications based on tasks assigned to the user and not completed
   const notifications = assignedTasks.map((task) => ({
-    const timeDiff = dueDate - today;
 
     title: `Task Assigned: ${task.title}`,
     message: `You are part of the team responsible for this task, that is not completed yet.`,
