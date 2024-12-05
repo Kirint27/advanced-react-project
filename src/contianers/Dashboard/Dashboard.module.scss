@@ -39,6 +39,46 @@ p{
 color: black;
 margin-left: 30%;
 }
+/* Style for the notifications container */
+/* Style for the notifications container */
+.notificationsContainer {
+  padding: 0; /* No extra padding */
+  margin: 0;  /* Remove margins */
+  list-style-type: disc; /* Use default bullets */
+  padding-left: 20px; /* Add space to the left for bullets */
+margin-left: 300px;
+background-color: #f9f9f9;
+width: 1000px;
+height: fit-content;
+}
+
+/* Style for each notification item */
+.notificationItem {
+  margin-bottom: 10px;  /* Space between notifications */
+  padding: 5px 0;       /* Vertical padding for better spacing */
+  font-size: 14px;      /* Regular font size */
+  color: #333;          /* Dark text color */
+}
+
+.notificationItem strong {
+  font-weight: bold;   /* Make the title bold */
+  color: #333;          /* Same text color */
+}
+
+.notificationItem p {
+  font-size: 14px;      /* Regular font size for the message */
+  color: #555;          /* Slightly lighter text for the message */
+  margin: 0;        
+  font-weight: bold;    /* Remove any default margins */
+}
+
+/* Style for the "No notifications" message */
+.noNotifications {
+  font-style: italic;
+  color: #888;
+  text-align: center;
+}
+
 @media only screen and (max-width: 990px) {
 .quickStats{
   margin-left: 40%;

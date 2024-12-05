@@ -62,7 +62,9 @@ const KanbanBoard = (props, { notifications, currentUser }) => {
 
         getTasks(projectId)
           .then((taskData) => {
-            setTasks(taskData);
+            setTasks(taskData); 
+                   saveTasksToLocalStorage(taskData);
+
           })
           .catch((error) => console.error("Error fetching tasks:", error));
         setNewTask({}); // Reset task form
@@ -91,7 +93,10 @@ const KanbanBoard = (props, { notifications, currentUser }) => {
       .catch((error) => console.error("Error updating task status:", error));
   };
 
-
+  const saveTasksToLocalStorage = (tasks) => {
+    localStorage.setItem("tasks", JSON.stringify(tasks)); 
+     // Store tasks as a JSON string
+  }
   return (
     <>
       <a onClick={() => navigate("/projects")} className={styles.backLink}>

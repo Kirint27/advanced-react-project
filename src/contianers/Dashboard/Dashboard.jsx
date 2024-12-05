@@ -9,7 +9,7 @@ import useProjects from '../../services/project.service';
 import'../../index.css';
 import { useLocation } from '@reach/router'; // Import useLocation from Reach Router
 import { updateCompletedProjectsCount } from '../../components/Kaban/Kaban';
-const Dashboard = ({tasks,completed }) => {
+const Dashboard = ({Complete }) => {
   const { user } = useLogin()
   const { completedProjectsCount, isLoading } = useProjects();
 console.log("completedProjectsCount:", completedProjectsCount);
@@ -17,14 +17,36 @@ console.log("completedProjectsCount:", completedProjectsCount);
    // Use the custom hook
   const { activeProjectsCount,projects } = useProjects(); // Corrected variable name
   console.log("Active Projects Count:", activeProjectsCount);
-  const notifications = [];
+  const [tasks, setTasks] = useState([]);
+
   // useEffect(() => {
   //   updateCompletedProjectsCount().then((completedProjectsCount) => {
   //     console.log('received completedProjectsCount:', completedProjectsCount);
   //     setCompletedProjectsCount(completedProjectsCount);
   //   });
   // }, []);
+  useEffect(() => {
+    const storedTasks = JSON.parse(localStorage.getItem("tasks"));
+    if (storedTasks) {
+      setTasks(storedTasks);
+    }
+  }, []);
 
+  const assignedTasks = tasks.filter(
+    (task) => 
+      task.assignedTo.includes(user?.displayName || user?.email) && task.status !== 'completed'
+  );
+
+  // Notifications based on tasks assigned to the user and not completed
+  const notifications = assignedTasks.map((task) => ({
+    const timeDiff = dueDate - today;
+
+    title: `Task Assigned: ${task.title}`,
+    message: `You are part of the team responsible for this task, that is not completed yet.`,
+    dueDate: `Due Date: ${task.dueDate}`,
+    taskId: task.id,
+  }));
+  
  const today = new Date(); // Current date
   const nextWeek = new Date(today); // Create a new Date object for next week
   nextWeek.setDate(today.getDate() + 7);
@@ -43,7 +65,7 @@ const formattedDueDate = (dueDate) => {
   return `${day}/${month}/${year}`;
 }
 
-
+console.log(notifications);
 
 
   return (
@@ -77,13 +99,20 @@ const formattedDueDate = (dueDate) => {
     </div>
     <SideBar />   
     <h3 className={styles.header}>Notifications</h3>
-    <ul>
-        {notifications.map((notification) => (
-          <li key={notification.title}>
-            {notification.title} - {notification.message}
-          </li>
-        ))}
-      </ul>
+    <ul className={styles.notificationsContainer}>
+  {notifications.length > 0 ? (
+    notifications.map((notification, index) => (
+      <li key={index} className={styles.notificationItem}>
+        <strong>{notification.title}</strong>
+        <p>{notification.message}</p>
+        <p>{notification.dueDate}</p>
+
+      </li>
+    ))
+  ) : (
+    <li className="no-notifications">No notifications.</li>
+  )}
+</ul>
 
   </>
   );
