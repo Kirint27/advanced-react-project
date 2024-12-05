@@ -38,9 +38,10 @@ export const getTasks = (id) => {
     });
 };
 
-export const addTask = (id) => {
-  const tasksCollectionRef = collection(db, "projects", id, "tasks");
-  return addDoc(tasksCollectionRef)
+export const addTask = (projectId, taskToAdd) => {
+  const tasksCollectionRef = collection(db, "projects", projectId, "tasks");
+
+  return addDoc(tasksCollectionRef, taskToAdd) // Pass taskData as the second argument
     .then((docRef) => {
       return docRef.id; // Return the ID of the newly added task
     })
@@ -48,6 +49,7 @@ export const addTask = (id) => {
       return Promise.reject(`Error adding task: ${error.message}`);
     });
 };
+
 export const deleteTask = (projectId, taskId) => {
   if (!projectId || !taskId) {
     console.error("Invalid projectId or taskId");
@@ -56,16 +58,26 @@ export const deleteTask = (projectId, taskId) => {
 
   const taskRef = doc(db, "projects", projectId, "tasks", taskId);
 
-  return deleteDoc(taskRef)
+  // First, check if the document exists
+  return getDoc(taskRef)
+    .then((docSnap) => {
+      if (!docSnap.exists()) {
+        // If the document doesn't exist, reject with an appropriate message
+        console.error("Task not found");
+        return Promise.reject("Task not found");
+      }
+
+      // If the document exists, proceed to delete it
+      return deleteDoc(taskRef);
+    })
     .then(() => {
-      console.log("Task deleted successfully");
       return true;
     })
     .catch((error) => {
       console.error("Error deleting task:", error);
-      throw error
-    })
-  }
+      throw error; // Re-throw the error to be caught in the calling function
+    });
+};
 export const updateCompletedProjectsCount = () => {
   return getTasks()
     .then((allTasks) => {
