@@ -38,6 +38,7 @@
     "build": "react-scripts build",
     "test": "jest",
     "eject": "react-scripts eject",
+    "deploy": "gh-pages -d build",
     "mkrc": "./node_modules/.bin/mkrc"
   },
   "eslintConfig": {
