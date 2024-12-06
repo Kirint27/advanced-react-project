@@ -1,6 +1,5 @@
 {
   "name": "react-ecommerce-app",
-  "homepage":"http://taskflow.kirinthapar.co.uk/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
