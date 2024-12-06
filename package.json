@@ -1,5 +1,6 @@
 {
   "name": "react-ecommerce-app",
+  "homepage":"http://kirint27.github.io/advanced-react-project/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
