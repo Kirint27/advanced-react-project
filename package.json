@@ -1,6 +1,6 @@
 {
   "name": "advanced-project",
-  "homepage":"https://taskflow.kirinthapar.co.uk/",
+  "homepage": "https://taskflow.kirinthapar.co.uk/",
   "build": {
     "publicPath": "/"
   },
@@ -13,14 +13,15 @@
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@reach/router": "^1.3.4",
-
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "cypress": "^13.16.1",
     "firebase": "^10.14.1",
     "firestore": "^1.1.6",
     "mkrc": "^1.3.36",
     "moment": "^2.30.1",
+    "normalize.css": "^8.0.1",
     "path-browserify": "^1.0.1",
     "react": "^18.3.1",
     "react-beautiful-dnd": "^13.1.1",
