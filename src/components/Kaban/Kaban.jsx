@@ -11,7 +11,7 @@ import { auth } from "../../firebase";
 import styles from "./Kaban.module.scss";
 import useProjects from "../../services/project.service";
 
-const KanbanBoard = (props, { notifications, currentUser }) => {
+const KanbanBoard = ( { notifications }) => {
   const { projectId } = useParams();
   const { updateProjectStatus, updateProjectStatusBasedOnTasks } =
     useProjects();
@@ -28,7 +28,6 @@ const KanbanBoard = (props, { notifications, currentUser }) => {
   };
   const members = project?.memberNames;
 
-  console.log("Members:", members);
   useEffect(() => {
     getProject(projectId)
       .then((projectData) => setProject(projectData))
@@ -62,9 +61,8 @@ const KanbanBoard = (props, { notifications, currentUser }) => {
 
         getTasks(projectId)
           .then((taskData) => {
-            setTasks(taskData); 
-                   saveTasksToLocalStorage(taskData);
-
+            setTasks(taskData);
+            saveTasksToLocalStorage(taskData);
           })
           .catch((error) => console.error("Error fetching tasks:", error));
         setNewTask({}); // Reset task form
@@ -94,9 +92,10 @@ const KanbanBoard = (props, { notifications, currentUser }) => {
   };
 
   const saveTasksToLocalStorage = (tasks) => {
-    localStorage.setItem("tasks", JSON.stringify(tasks)); 
-     // Store tasks as a JSON string
-  }
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    // Store tasks as a JSON string
+  };
+
   return (
     <>
       <a onClick={() => navigate("/projects")} className={styles.backLink}>

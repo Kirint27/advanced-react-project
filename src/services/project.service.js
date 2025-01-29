@@ -52,7 +52,6 @@ const useProjects = () => {
         return [];
       });
   };
-
   const updateProjectStatusBasedOnTasks = (projectId, updateProjectStatus) => {
     getTasks(projectId)
       .then((tasks) => {

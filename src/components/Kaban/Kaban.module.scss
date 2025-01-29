@@ -150,18 +150,19 @@ select {
   }
 }
 @media (max-width: 768px) {
-.kanbanBoard {
-  width: 200px;
-  overflow: hidden;
-  scroll-behavior: smooth;
-}
-  .kanbanColumns {
-display: grid;
-gap: 20px;
-grid-template-columns: repeat(1, 1fr);    margin-bottom: 20px;
-margin-left: 0;
+  .kanbanBoard {
+    width: 200px;
+    overflow: hidden;
+    scroll-behavior: smooth;
   }
-  .kanbanColumn{
+  .kanbanColumns {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(1, 1fr);
+    margin-bottom: 20px;
+    margin-left: 0;
+  }
+  .kanbanColumn {
     width: 90%;
     margin-left: 0;
   }

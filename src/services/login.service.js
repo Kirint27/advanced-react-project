@@ -2,16 +2,14 @@ import { useState, useEffect } from "react";
 import { auth, provider } from "../firebase"; // Firebase auth and provider
 import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import { db } from "../firebase";
-import { doc, setDoc,  } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 
 const useLogin = () => {
   const [user, setUser] = useState(null); // Store user object
   const [loading, setLoading] = useState(true); // Track loading state
   const [error, setError] = useState(null); // Store error messages
 
-
   useEffect(() => {
-    // This is Firebase's listener for auth state changes
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser); // If user is logged in, set the user state
@@ -30,14 +28,17 @@ const useLogin = () => {
       .then((result) => {
         const user = result.user;
         setUser(user); // Set user state after successful login
-        console.log("User logged in with popup:", user);
         const userRef = doc(db, "users", user.uid); // Use the user's UID as the document ID
-        setDoc(userRef, {
-          displayName: user.displayName, 
-          email: user.email,
-id : user.uid        }, { merge: true }) // merge: true ensures it doesn't overwrite existing fields
+        setDoc(
+          userRef,
+          {
+            displayName: user.displayName,
+            email: user.email,
+            id: user.uid,
+          },
+          { merge: true }
+        ) // merge: true ensures it doesn't overwrite existing fields
           .then(() => {
-            console.log("User saved to Firestore");
           })
           .catch((error) => {
             console.error("Error saving user to Firestore:", error);

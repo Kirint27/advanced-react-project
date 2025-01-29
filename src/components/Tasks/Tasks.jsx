@@ -21,7 +21,6 @@ const Task = ({
     console.log("Popup is now:", isPopupOpen ? "open" : "closed");
   }, [isPopupOpen]); // This runs whenever isPopupOpen changes
 
-  console.log(tasks);
   const handleTaskClick = (taskId) => {
     if (!isPopupOpen) {
       setIsPopupOpen(true);
@@ -61,16 +60,16 @@ const Task = ({
         </p>
 
         {isPopupOpen && (
-  <div className={styles.popup}>
-  <div className={styles.popupContent}>
-    <p className={styles.detailsTitle}>Details:</p> {/* Apply the new class */}
-    <p>{task.description}</p>
-    <button className={styles.closeButton} onClick={handlePopupClose}>
-      Close
-    </button>
-  </div>
-</div>
-
+          <div className={styles.popup}>
+            <div className={styles.popupContent}>
+              <p className={styles.detailsTitle}>Details:</p>{" "}
+              {/* Apply the new class */}
+              <p>{task.description}</p>
+              <button className={styles.closeButton} onClick={handlePopupClose}>
+                Close
+              </button>
+            </div>
+          </div>
         )}
       </div>
       <p> Move To:</p>

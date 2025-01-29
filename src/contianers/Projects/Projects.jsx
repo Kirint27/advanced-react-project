@@ -9,8 +9,13 @@ import { auth } from "../../firebase";
 import { getTasks, updateProjectStatus } from "../../services/kaban.service"; // Assuming you have a getTasks function
 
 const Projects = () => {
-  const { deleteProject, fetchProjects, user, updateProjectStatus, updateProjectStatusBasedOnTasks } =
-    useProjects();
+  const {
+    deleteProject,
+    fetchProjects,
+    user,
+    updateProjectStatus,
+    updateProjectStatusBasedOnTasks,
+  } = useProjects();
   const navigate = useNavigate(); // Initialize navigate
   const [userSearch, setUserSearch] = useState(""); // State for the user's input in autocomplete
   const [users, setUsers] = useState([]); // State for storing all users in Firestore
@@ -30,8 +35,8 @@ const Projects = () => {
   const toggleForm = ({ tasks }) => {
     setIsFormVisible(!isFormVisible);
     setUserSearch(""); // Reset the user search input
-  setSelectedUsers([]); // Also reset the selected users
-  setSelectedUserNames(""); // And reset the selected user names
+    setSelectedUsers([]); // Also reset the selected users
+    setSelectedUserNames(""); // And reset the selected user names
   };
 
   // Fetch projects only when the component mounts (and when the user changes)
@@ -49,27 +54,24 @@ const Projects = () => {
     }
   }, [currentUser]); // Only run once when component mounts or when user changes
 
-
- useEffect(() => {
-  const fetchUsers = () => {
-    getDocs(collection(db, "users"))
-      .then((usersSnapshot) => {
-        const usersList = usersSnapshot.docs.map((doc) => doc.data());
-        setUsers(usersList);
-      })
-      .catch((error) => {
-        console.error("Error fetching users:", error);
-      });
-  };
-  fetchUsers();
-}, []);
+  useEffect(() => {
+    const fetchUsers = () => {
+      getDocs(collection(db, "users"))
+        .then((usersSnapshot) => {
+          const usersList = usersSnapshot.docs.map((doc) => doc.data());
+          setUsers(usersList);
+        })
+        .catch((error) => {
+          console.error("Error fetching users:", error);
+        });
+    };
+    fetchUsers();
+  }, []);
   // Handle form submission (adding new project)
 
-const handleUserSearch = (e) => {
-  setUserSearch(e.target.value);
-};
-
-
+  const handleUserSearch = (e) => {
+    setUserSearch(e.target.value);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -107,9 +109,9 @@ const handleUserSearch = (e) => {
       });
   };
 
-  console.log(selectedUserNames);
 
-  const filteredUsers = users.filter(user => 
+
+  const filteredUsers = users.filter((user) =>
     user.displayName.toLowerCase().includes(userSearch.toLowerCase())
   );
 
@@ -132,8 +134,7 @@ const handleUserSearch = (e) => {
       });
   };
 
-  console.log(projects);
-  
+=
   return (
     <div className={styles.projects}>
       <h2>Projects</h2>
@@ -163,7 +164,6 @@ const handleUserSearch = (e) => {
               value={projectDescription}
               onChange={(e) => setProjectDescription(e.target.value)}
               required
-              
             />
           </div>
           <div>
@@ -194,34 +194,35 @@ const handleUserSearch = (e) => {
           <div>
             <label>Project Members:</label>
             <input
-            type="text"
-            value={userSearch}
-            onChange={handleUserSearch}
-            placeholder="Search users"
-          />
-   {userSearch && (
-            <div className={styles.autocompleteResults}>
-           {filteredUsers.map((user) => (
-  <div
-    key={user.uid}
-    className={styles.autocompleteItem}
-    onClick={() => {
-      if (!selectedUsers.some(user => selectedUsers.uid === user.uid)) {
-
-      setSelectedUsers((prevUsers) => [...prevUsers, user]);
-      setSelectedUserNames((prevNames) => `${prevNames}, ${user.displayName}`);
-      
-      }
-    }}
-  >
-    {user.displayName}
-  </div>
-))}
-              
-             
-      
-            </div>
-          )}
+              type="text"
+              value={userSearch}
+              onChange={handleUserSearch}
+              placeholder="Search users"
+            />
+            {userSearch && (
+              <div className={styles.autocompleteResults}>
+                {filteredUsers.map((user) => (
+                  <div
+                    key={user.uid}
+                    className={styles.autocompleteItem}
+                    onClick={() => {
+                      if (
+                        !selectedUsers.some(
+                          (user) => selectedUsers.uid === user.uid
+                        )
+                      ) {
+                        setSelectedUsers((prevUsers) => [...prevUsers, user]);
+                        setSelectedUserNames(
+                          (prevNames) => `${prevNames}, ${user.displayName}`
+                        );
+                      }
+                    }}
+                  >
+                    {user.displayName}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <button type="submit">Submit</button>
           <button type="button" onClick={toggleForm}>
@@ -252,7 +253,8 @@ const handleUserSearch = (e) => {
                   <strong>Priority:</strong> {project.priority}
                 </p>
                 <p>
-                <strong>Members:</strong> {project.memberNames.join(', ')}
+                  <strong> Additional Members:</strong>{" "}
+                  {project.memberNames.join(", ")}
                 </p>
                 <div className={styles.buttonContainer}>
                   <button

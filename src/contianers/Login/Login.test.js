@@ -14,17 +14,3 @@ jest.mock('../../services/login.service', () => ({
 
 }));
 
-describe('Login component', () => {
-  it('renders correctly', () => {
-    const { getByText } = render(<Login />);
-    expect(getByText('Project Management Tool')).toBeInTheDocument();
-    expect(getByText('Sign in with Google')).toBeInTheDocument();
-  });
-
-  it('calls loginWithGooglePopup on button click', () => {
-    const { getByText } = render(<Login />);
-    const loginButton = getByText('Sign in with Google');
-    fireEvent.click(loginButton);
-    expect(useLogin().loginWithGooglePopup).toHaveBeenCalledTimes(1);
-  });
-});

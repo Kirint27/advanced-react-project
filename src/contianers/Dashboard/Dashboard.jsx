@@ -13,11 +13,9 @@ import { updateCompletedProjectsCount } from "../../components/Kaban/Kaban";
 const Dashboard = ({ Complete }) => {
   const { user } = useLogin();
   const { completedProjectsCount, isLoading } = useProjects();
-  console.log("completedProjectsCount:", completedProjectsCount);
   const { projectId } = useParams();
   // Use the custom hook
   const { activeProjectsCount, projects } = useProjects(); // Corrected variable name
-  console.log("Active Projects Count:", activeProjectsCount);
   const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
@@ -67,10 +65,7 @@ const Dashboard = ({ Complete }) => {
     return `${day}/${month}/${year}`;
   };
 
-  console.log(user);
-
-  console.log("Projects:", projects);
-  const overdueProjects = projects
+const overdueProjects = projects
     .filter((project) => {
       const projectDueDate = new Date(project.dueDate);
       return projectDueDate < today;

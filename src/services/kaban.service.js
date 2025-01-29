@@ -102,7 +102,6 @@ export const updateTaskStatus = (projectId, taskId, newStatus) => {
   const taskRef = doc(collection(db, "projects", projectId, "tasks"), taskId);
   return updateDoc(taskRef, { status: newStatus })
     .then(() => {
-      console.log("Task status updated successfully");
     })
     .catch((error) => {
       console.error("Error updating task status:", error);
